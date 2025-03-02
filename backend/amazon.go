@@ -6,17 +6,12 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly"
-	// "strings"
 )
 
 func ScrapePriceAmazon(url string) (string, error) {
-	// Create a new collector
 	scraper := colly.NewCollector(
-	// Allow only Amazon domains
-	// colly.AllowedDomains("www.amazon.com", "amazon.com", "www.amazon.in"),
 	)
 
-	// scraper := colly.NewCollector()
 
 	var price string
 
@@ -26,19 +21,15 @@ func ScrapePriceAmazon(url string) (string, error) {
 		r.Headers.Set("X-Forwarded-For", "103.211.212.105")
 		r.Headers.Set("Cookie", "session=idk; region=IN")
 		r.Headers.Set("Referer", "https://www.google.co.in/")
-		// fmt.Printf("Visiting... %s\n", r.URL)
 	})
 
-	// Find the price element and extract the text
 	scraper.OnHTML("span.a-price", func(e *colly.HTMLElement) {
 		if e.Index == 5 {
 			priceWhole := e.ChildText("span.a-price-whole")
-			// Remove commas from price
 			price = strings.ReplaceAll(priceWhole, ",", "") 
 		}
 	})
 
-	// Handle errors
 	scraper.OnError(func(r *colly.Response, err error) {
 		log.Println("Error:", err)
 	})
@@ -49,17 +40,6 @@ func ScrapePriceAmazon(url string) (string, error) {
 		return "", fmt.Errorf("price not found on Amazon page")
 	}
 	return price, err
-	// Visit the URL
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to scrape Amazon: %v", err)
-	// }
-	// fmt.Println(price)
-	// price = strings.TrimSpace(price)
-	// if price == "" {
-	// 	return "", fmt.Errorf("price not found on Amazon page")
-	// }
-
-	// return price, nil
 }
 
 // func main() {
