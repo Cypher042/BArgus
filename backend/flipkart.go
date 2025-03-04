@@ -100,29 +100,29 @@ func ScrapeHighlightsFlipkart(url string) ([]string, error) {
 	return highlights, nil
 }
 
-func main() {
-	url := "https://www.flipkart.com/oppo-enco-buds-2-28-hours-battery-life-deep-noise-cancellation-bluetooth-headset/p/itm3344fa26518ed"
-	// url = "https://www.flipkart.com/mezokart-com-silicone-press-stud-earbuds-pouch-oppo-enco-air-2/p/itm0b9d69a73b71a"
-	price, err := ScrapePriceFlipkart(url)
-	if err != nil {
-		log.Fatalf("Error scraping Flipkart: %v", err)
-	}
-	fmt.Println(price)
+// func main() {
+// 	url := "https://www.flipkart.com/oppo-enco-buds-2-28-hours-battery-life-deep-noise-cancellation-bluetooth-headset/p/itm3344fa26518ed"
+// 	// url = "https://www.flipkart.com/mezokart-com-silicone-press-stud-earbuds-pouch-oppo-enco-air-2/p/itm0b9d69a73b71a"
+// 	price, err := ScrapePriceFlipkart(url)
+// 	if err != nil {
+// 		log.Fatalf("Error scraping Flipkart: %v", err)
+// 	}
+// 	fmt.Println(price)
 
-	imageURL, err := ScrapeImageURLFlipkart(url)
-	if err != nil {
-		log.Fatalf("Error scraping Flipkart image: %v", err)
-	}
-	fmt.Println("Product Image URL:", imageURL)
+// 	imageURL, err := ScrapeImageURLFlipkart(url)
+// 	if err != nil {
+// 		log.Fatalf("Error scraping Flipkart image: %v", err)
+// 	}
+// 	fmt.Println("Product Image URL:", imageURL)
 
-	highlights, err := ScrapeHighlightsFlipkart(url)
-	if err != nil {
-		log.Fatalf("Error scraping Flipkart highlights: %v", err)
-	}
-	fmt.Println("Product Highlights:")
-	for i, highlight := range highlights {
-		fmt.Printf("%d. %s\n", i+1, highlight)
-	}
-	// fmt.Println(len(highlights))
+// 	highlights, err := ScrapeHighlightsFlipkart(url)
+// 	if err != nil {
+// 		log.Fatalf("Error scraping Flipkart highlights: %v", err)
+// 	}
+// 	fmt.Println("Product Highlights:")
+// 	for i, highlight := range highlights {
+// 		fmt.Printf("%d. %s\n", i+1, highlight)
+// 	}
+// 	// fmt.Println(len(highlights))
 
-}
+// }
