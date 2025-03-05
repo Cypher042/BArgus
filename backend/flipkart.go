@@ -100,6 +100,40 @@ func ScrapeHighlightsFlipkart(url string) ([]string, error) {
 	return highlights, nil
 }
 
+func ScrapeNameFlipkart(url string) (string, error) {
+	scraper := colly.NewCollector()
+
+	var productName string
+
+	// Scrape the product name (Flipkart typically uses span.B_NuCI for product titles)
+	scraper.OnHTML("span.VU-ZEz", func(e *colly.HTMLElement) {
+		productName = strings.TrimSpace(e.Text)
+	})
+
+	scraper.OnError(func(r *colly.Response, err error) {
+		log.Println("Error:", err)
+	})
+
+	scraper.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
+		r.Headers.Set("Accept-Language", "en-IN,en;q=0.9,hi;q=0.8")
+		r.Headers.Set("X-Forwarded-For", "103.211.212.105")
+		r.Headers.Set("Cookie", "session=idkbro; region=IN")
+		r.Headers.Set("Referer", "https://www.google.co.in/")
+	})
+
+	err := scraper.Visit(url)
+	if err != nil {
+		return "", fmt.Errorf("error visiting URL: %v", err)
+	}
+
+	if productName == "" {
+		return "", fmt.Errorf("product name not found on Flipkart page")
+	}
+
+	return productName, nil
+}
+
 // func main() {
 // 	url := "https://www.flipkart.com/oppo-enco-buds-2-28-hours-battery-life-deep-noise-cancellation-bluetooth-headset/p/itm3344fa26518ed"
 // 	// url = "https://www.flipkart.com/mezokart-com-silicone-press-stud-earbuds-pouch-oppo-enco-air-2/p/itm0b9d69a73b71a"
@@ -125,4 +159,14 @@ func ScrapeHighlightsFlipkart(url string) ([]string, error) {
 // 	}
 // 	// fmt.Println(len(highlights))
 
+// }
+
+// func main() {
+// 	url := "https://www.flipkart.com/oppo-enco-buds-2-28-hours-battery-life-deep-noise-cancellation-bluetooth-headset/p/itm3344fa26518ed"
+
+// 	name, err := ScrapeNameFlipkart(url)
+// 	if err != nil {
+// 		log.Fatalf("Error scraping name: %v", err)
+// 	}
+// 	fmt.Printf("Product Name: %s\n", name)
 // }

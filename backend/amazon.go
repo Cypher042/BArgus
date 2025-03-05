@@ -75,7 +75,7 @@ func ScrapeNameAmazon(url string) (string, error) {
 	err := scraper.Visit(url)
 
 	if productName == "" {
-		return "", fmt.Errorf("price not found on Amazon page")
+		return "", fmt.Errorf("name not found on Amazon page")
 	}
 	return productName, err
 }
@@ -150,6 +150,7 @@ func ScrapeImageURLAmazon(url string) (string, error) {
 // 	// url = "https://www.amazon.in/Logitech-M331-Silent-Wireless-Mouse/dp/B01M5H4B4N/261-8651419-6199515?pd_rd_w=ORrFb&content-id=amzn1.sym.aef73018-e935-4f38-8aa6-34add793f754&pf_rd_p=aef73018-e935-4f38-8aa6-34add793f754&pf_rd_r=F3CMYCVREX065ZPXVR4V&pd_rd_wg=b3vCk&pd_rd_r=958564e4-9887-4405-9a0f-7c0f1c994f34&pd_rd_i=B01M5H4B4N&psc=1"
 // 	url = "https://www.amazon.in/Logitech-Receiver-Wireless-Technology-Compatible/dp/B09LQ461ZV/261-8651419-6199515?pd_rd_w=ORrFb&content-id=amzn1.sym.aef73018-e935-4f38-8aa6-34add793f754&pf_rd_p=aef73018-e935-4f38-8aa6-34add793f754&pf_rd_r=F3CMYCVREX065ZPXVR4V&pd_rd_wg=b3vCk&pd_rd_r=958564e4-9887-4405-9a0f-7c0f1c994f34&pd_rd_i=B09LQ461ZV&psc=1"
 // 	url = "https://www.amazon.in/Airdopes-141-Playtime-Resistance-Bluetooth/dp/B09N3ZNHTY/?_encoding=UTF8&pd_rd_w=swCmk&content-id=amzn1.sym.b5a625fa-e3eb-4301-a9e2-f9c8b3e7badf%3Aamzn1.symc.36bd837a-d66d-47d1-8457-ffe9a9f3ddab&pf_rd_p=b5a625fa-e3eb-4301-a9e2-f9c8b3e7badf&pf_rd_r=97WV1PA07DJ2AZP4N956&pd_rd_wg=5Lbrn&pd_rd_r=fc9e8168-6738-4aee-a693-a13b3cad0f23&ref_=pd_hp_d_btf_ci_mcx_mr_hp_atf_m&th=1"
+// 	url = "https://www.amazon.in/ASUS-39-62cm-i7-13620H-GeForce-FX507VV-LP287W/dp/B0D25TQNN7/?_encoding=UTF8&pd_rd_w=z5ddw&content-id=amzn1.sym.509965a2-791b-4055-b876-943397d37ed3%3Aamzn1.symc.fc11ad14-99c1-406b-aa77-051d0ba1aade&pf_rd_p=509965a2-791b-4055-b876-943397d37ed3&pf_rd_r=DA4691081SBSZMSJTQW0&pd_rd_wg=XpspG&pd_rd_r=97bc9178-9cba-445a-9cc1-ae382b0a7a54&ref_=pd_hp_d_atf_ci_mcx_mr_ca_hp_atf_d&th=1"
 // 	price, err := ScrapeNameAmazon(url)
 // 	if err != nil {
 
