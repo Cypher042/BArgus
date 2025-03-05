@@ -66,6 +66,7 @@ func NewMongoDB(uri string, username string) (*MongoDB, error) {
 	}, nil
 }
 
+func (m *MongoDB) UpsertProduct(product Product) error {
 	var existingProduct Product
 	err := m.collection.FindOne(
 		context.Background(),
