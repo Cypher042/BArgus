@@ -1,1 +1,9 @@
-config.go
+config*
+__pycache__
+
+*.html
+*.csv
+*.json
+*.jsonl
+*.jsonl.gz
+*.venv
