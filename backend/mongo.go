@@ -38,7 +38,6 @@ func NewMongoDB(uri string, username string) (*MongoDB, error) {
 		return nil, err
 	}
 
-	// Ping the database to verify connection
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		return nil, err
@@ -47,7 +46,6 @@ func NewMongoDB(uri string, username string) (*MongoDB, error) {
 	database := client.Database("price_tracker")
 	collection := database.Collection(username)
 
-	// Create indexes
 	_, err = collection.Indexes().CreateOne(
 		context.Background(),
 		mongo.IndexModel{
@@ -68,25 +66,20 @@ func NewMongoDB(uri string, username string) (*MongoDB, error) {
 	}, nil
 }
 
-func (m *MongoDB) UpsertProduct(product *Product) error {
-	// 1. Check for existing product
 	var existingProduct Product
 	err := m.collection.FindOne(
 		context.Background(),
 		bson.M{"product_url": product.ProductURL},
 	).Decode(&existingProduct)
 
-	// 2. Handle the error check
 	if err != nil && err != mongo.ErrNoDocuments {
 		return fmt.Errorf("error checking existing product: %v", err)
 	}
 
-	// 3. Preserve price history if product exists
 	if err != mongo.ErrNoDocuments {
 		product.PriceHistory = existingProduct.PriceHistory
 	}
 
-	// 4. Perform the upsert operation
 	filter := bson.M{"product_url": product.ProductURL}
 	update := bson.M{"$set": product}
 	opts := options.Update().SetUpsert(true)
@@ -141,7 +134,6 @@ func (m *MongoDB) UpdatePrices() error {
 			continue
 		}
 
-		// Get current price based on URL
 		var currentPrice float64
 		var err error
 
@@ -172,13 +164,11 @@ func (m *MongoDB) UpdatePrices() error {
 			continue
 		}
 
-		// Create new price entry
 		newPrice := Price{
 			Value:     currentPrice,
 			Timestamp: time.Now(),
 		}
 
-		// Update the product with new price
 		update := bson.M{
 			"$push": bson.M{
 				"price_history": newPrice,
@@ -201,23 +191,7 @@ func (m *MongoDB) UpdatePrices() error {
 	return nil
 }
 
-// // Optionally verify updates
-// products, err := db.GetAllProducts()
-// if err != nil {
-// 	log.Fatalf("Failed to get products: %v", err)
-// }
 
-// 	fmt.Printf("\nVerifying price updates for %d products:\n", len(products))
-// 	for _, product := range products {
-// 		if len(product.PriceHistory) > 0 {
-// 			latestPrice := product.PriceHistory[len(product.PriceHistory)-1]
-// 			fmt.Printf("%s: Latest price %.2f at %s\n",
-// 				product.ProductName,
-// 				latestPrice.Value,
-// 				latestPrice.Timestamp.Format(time.RFC3339))
-// 		}
-// 	}
-// }
 
 func (m *MongoDB) UpdateIncompleteRecords() error {
 
@@ -243,7 +217,6 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 	}
 	defer cursor.Close(context.Background())
 
-	// Process each incomplete record
 	for cursor.Next(context.Background()) {
 		var product Product
 		if err := cursor.Decode(&product); err != nil {
@@ -252,7 +225,6 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 		}
 
 		url := (product.ProductURL)
-		// var updatedProduct Product
 
 		updatedProduct, err := scrapeProductDetails(url)
 
@@ -261,7 +233,6 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 			continue
 		}
 
-		// Update the product in database
 		err = db.UpsertProduct(updatedProduct)
 		if err != nil {
 			log.Printf("Error updating product %s: %v\n", product.ProductURL, err)
@@ -272,19 +243,4 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 	return nil
 }
 
-// Verify updates by getting all products
-// 	fmt.Println("\nVerifying updates...")
-// 	products, err := db.GetAllProducts()
-// 	if err != nil {
-// 		log.Fatalf("Error getting all products: %v", err)
-// 	}
 
-// 	fmt.Printf("\nFound %d products:\n", len(products))
-// 	for i, product := range products {
-// 		fmt.Printf("\n--- Product %d ---\n", i+1)
-// 		fmt.Printf("URL: %s\n", product.ProductURL)
-// 		fmt.Printf("Name: %s\n", product.ProductName)
-// 		fmt.Printf("Image: %s\n", product.ImageURL)
-// 		fmt.Printf("Specifications: %+v\n", product.Specifications)
-// 	}
-// }
