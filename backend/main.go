@@ -36,6 +36,8 @@ func scrapeProductDetails(productURL string) (*Product, error) {
 			ImageURL:       imageURL,
 			Specifications: specs,
 			PriceHistory:   []Price{},
+			MinPrice:       0,
+			MaxPrice:       0,
 		}
 		return filledProduct, nil
 	}
@@ -45,33 +47,33 @@ func scrapeProductDetails(productURL string) (*Product, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to scrape name: %v", err)
 		}
-		
+
 		// Get image URL
 		imageURL, err := ScrapeImageURLFlipkart(productURL)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scrape image URL: %v", err)
 		}
-		
+
 		// Get specifications
 		specs, err := ScrapeHighlightsFlipkart(productURL)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scrape specifications: %v", err)
 		}
-		
+
 		filledProduct := &Product{
 			ProductURL:     productURL,
 			ProductName:    name,
 			ImageURL:       imageURL,
 			Specifications: specs,
 			PriceHistory:   []Price{},
+			MinPrice:       0,
+			MaxPrice:       0,
 		}
 		return filledProduct, nil
 	}
 	// return nil, fmt.Errorf("unsupported vendor or invalid URL: %s", productURL)
 	return nil, fmt.Errorf("unsupported vendor or invalid URL: %s", productURL)
 }
-
-
 
 func main() {
 	// Initialize MongoDB connection
@@ -85,6 +87,7 @@ func main() {
 	// Update prices
 	fmt.Println("Starting price update...")
 	err = db.UpdateIncompleteRecords()
+	
 	if err != nil {
 		log.Fatalf("Failed to update prices: %v", err)
 	}

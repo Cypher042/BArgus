@@ -17,13 +17,15 @@ type Price struct {
 	Value     float64   `bson:"value"`
 	Timestamp time.Time `bson:"timestamp"`
 }
-
+// 
 type Product struct {
 	ProductURL     string   `bson:"product_url"`
 	ProductName    string   `bson:"product_name"`
 	ImageURL       string   `bson:"image_url"`
 	Specifications []string `bson:"specifications"`
 	PriceHistory   []Price  `bson:"price_history"`
+	MinPrice       float64      `bson:"min_price"`
+	MaxPrice       float64      `bson:"max_price"`
 }
 
 type MongoDB struct {
@@ -67,18 +69,24 @@ func NewMongoDB(uri string, username string) (*MongoDB, error) {
 }
 
 func (m *MongoDB) UpsertProduct(product Product) error {
+	// 1. Try to find an existing product with the same URL
 	var existingProduct Product
 	err := m.collection.FindOne(
 		context.Background(),
 		bson.M{"product_url": product.ProductURL},
 	).Decode(&existingProduct)
 
+	// 2. Handle potential errors from the find operation
 	if err != nil && err != mongo.ErrNoDocuments {
 		return fmt.Errorf("error checking existing product: %v", err)
 	}
 
+	// 3. If product exists, preserve its price history
 	if err != mongo.ErrNoDocuments {
 		product.PriceHistory = existingProduct.PriceHistory
+		// Initialize min/max from existing product
+		// product.MinPrice = existingProduct.MinPrice
+		// product.MaxPrice = existingProduct.MaxPrice
 	}
 
 	filter := bson.M{"product_url": product.ProductURL}
@@ -151,6 +159,7 @@ func (m *MongoDB) UpdatePrices() error {
 			}
 		} else if strings.Contains(product.ProductURL, "amazon") {
 			priceStr, err := ScrapePriceAmazon(product.ProductURL)
+			fmt.Println(priceStr)
 			if err != nil {
 				log.Printf("Error scraping Amazon price for %s: %v\n", product.ProductURL, err)
 				continue
@@ -165,6 +174,14 @@ func (m *MongoDB) UpdatePrices() error {
 			continue
 		}
 
+		// currentPrice := int(product.PriceHistory[len(product.PriceHistory)-1].Value)
+		if product.MinPrice == 0 || currentPrice < product.MinPrice {
+			product.MinPrice = currentPrice
+		}
+		if product.MaxPrice == 0 || currentPrice > product.MaxPrice {
+			product.MaxPrice = currentPrice
+		}
+
 		newPrice := Price{
 			Value:     currentPrice,
 			Timestamp: time.Now(),
@@ -173,6 +190,10 @@ func (m *MongoDB) UpdatePrices() error {
 		update := bson.M{
 			"$push": bson.M{
 				"price_history": newPrice,
+			},
+			"$set": bson.M{
+				"min_price": product.MinPrice,
+				"max_price": product.MaxPrice,
 			},
 		}
 
@@ -191,8 +212,6 @@ func (m *MongoDB) UpdatePrices() error {
 
 	return nil
 }
-
-
 
 func (m *MongoDB) UpdateIncompleteRecords() error {
 
@@ -234,7 +253,7 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 			continue
 		}
 
-		err = db.UpsertProduct(updatedProduct)
+		err = db.UpsertProduct(*updatedProduct)
 		if err != nil {
 			log.Printf("Error updating product %s: %v\n", product.ProductURL, err)
 			continue
@@ -243,5 +262,3 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 	}
 	return nil
 }
-
-
