@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+customKey : process.env.MONGODB_URI,
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig
