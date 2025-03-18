@@ -91,10 +91,11 @@ def get_price(id, username):
 		price['_id'] = str(price['_id'])
 	return jsonify(price['price_history'])
 
-@app.get("/predict/{username}/{product_id}")
-def predict(username: str, product_id: str, days: int = 7):
+@app.get("/predict/<username>/<product_id>")
+def predict(username, product_id):
     try:
         # Connect to MongoDB and get historical data
+	date = 7
         client = MongoClient(MongoURI)
         db = client['price_tracker']
         collection = db[username]       
