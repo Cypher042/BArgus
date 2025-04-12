@@ -1,4 +1,4 @@
-module backend
+module github.com/Cypher042/BArgus/backend
 
 go 1.23
 

@@ -7,25 +7,47 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/Cypher042/BArgus/backend/scraper"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
+
+var Client *mongo.Client
+var DB *mongo.Database
+var Users *mongo.Collection
+var Games *mongo.Collection
+
+func Connect() func() {
+	Client, err := mongo.Connect(options.Client().ApplyURI(config.MONGO_URI))
+	if err != nil {
+		panic(err)
+	}
+
+	DB = Client.Database("test")
+	Users = DB.Collection("users")
+	Games = DB.Collection("games")
+	return func() {
+		if err := Client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}
+}
 
 type Price struct {
 	Value     float64   `bson:"value"`
 	Timestamp time.Time `bson:"timestamp"`
 }
-// 
+
 type Product struct {
 	ProductURL     string   `bson:"product_url"`
 	ProductName    string   `bson:"product_name"`
 	ImageURL       string   `bson:"image_url"`
 	Specifications []string `bson:"specifications"`
 	PriceHistory   []Price  `bson:"price_history"`
-	MinPrice       float64      `bson:"min_price"`
-	MaxPrice       float64      `bson:"max_price"`
+	MinPrice       float64  `bson:"min_price"`
+	MaxPrice       float64  `bson:"max_price"`
 }
 
 type MongoDB struct {
@@ -147,7 +169,7 @@ func (m *MongoDB) UpdatePrices() error {
 		var err error
 
 		if strings.Contains(product.ProductURL, "flipkart") {
-			priceStr, err := ScrapePriceFlipkart(product.ProductURL)
+			priceStr, err := scraper.ScrapePriceFlipkart(product.ProductURL)
 			if err != nil {
 				log.Printf("Error scraping Flipkart price for %s: %v\n", product.ProductURL, err)
 				continue
@@ -158,7 +180,7 @@ func (m *MongoDB) UpdatePrices() error {
 				continue
 			}
 		} else if strings.Contains(product.ProductURL, "amazon") {
-			priceStr, err := ScrapePriceAmazon(product.ProductURL)
+			priceStr, err := scraper.ScrapePriceAmazon(product.ProductURL)
 			fmt.Println(priceStr)
 			if err != nil {
 				log.Printf("Error scraping Amazon price for %s: %v\n", product.ProductURL, err)
