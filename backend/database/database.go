@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"github.com/Cypher042/BArgus/backend/scraper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

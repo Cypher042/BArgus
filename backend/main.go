@@ -1,12 +1,12 @@
 package main
 
 import (
-	// "fmt"
-	// "time"
 	"log"
-	// "context"
 	"fmt"
 	"strings"
+	"github.com/Cypher042/BArgus/backend/scraper"
+	"github.com/Cypher042/BArgus/backend/api"
+	"github.com/Cypher042/BArgus/backend/database"
 )
 
 func scrapeProductDetails(productURL string) (*Product, error) {
