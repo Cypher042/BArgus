@@ -6,7 +6,6 @@ toolchain go1.23.6
 
 require (
 	github.com/gocolly/colly v1.2.0
-	go.mongodb.org/mongo-driver v1.17.3
 	go.mongodb.org/mongo-driver/v2 v2.2.0
 )
 

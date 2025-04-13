@@ -16,7 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var Client *mongo.Client
 var DB *mongo.Database
 
 // var User *mongo.Collection
@@ -70,78 +69,39 @@ func UpsertProduct(product models.Product, user string) error {
 	return err
 }
 
-// func AddPrice(productURL string, price float64) error {
-// 	newPrice := Price{
-// 		Value:     price,
-// 		Timestamp: time.Now(),
-// 	}
 
-// 	filter := bson.M{"product_url": productURL}
-// 	update := bson.M{"$push": bson.M{"price_history": newPrice}}
 
-// 	_, err := m.collection.UpdateOne(context.Background(), filter, update)
-// 	return err
-// }
-
-// func GetProduct(productURL string) (*models.Product, error) {
-// 	var product models.Product
-
-// 	err := m.collection.FindOne(
-// 		context.Background(),
-// 		bson.M{"product_url": productURL},
-// 	).Decode(&product)
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &product, nil
-// }
-
-func UpdatePrices(user string) error {
+func UpdatePrices(user string, product *models.Product) error {
 	// Get all products
-	collection := DB.Collection(user)
-	cursor, err := collection.Find(context.Background(), bson.M{})
-	if err != nil {
-		return fmt.Errorf("failed to find products: %v", err)
-	}
-	defer cursor.Close(context.Background())
-
-	for cursor.Next(context.Background()) {
-		var product models.Product
-		if err := cursor.Decode(&product); err != nil {
-			log.Printf("Error decoding product: %v\n", err)
-			continue
-		}
 
 		var currentPrice float64
-		var err error
 
 		if strings.Contains(product.ProductURL, "flipkart") {
 			priceStr, err := scraper.ScrapePriceFlipkart(product.ProductURL)
 			if err != nil {
 				log.Printf("Error scraping Flipkart price for %s: %v\n", product.ProductURL, err)
-				continue
+				return err
 			}
 			currentPrice, err = strconv.ParseFloat(priceStr, 64)
 			if err != nil {
 				log.Printf("Error parsing price %s: %v\n", priceStr, err)
-				continue
-			}
+				return err
+		
 		} else if strings.Contains(product.ProductURL, "amazon") {
 			priceStr, err := scraper.ScrapePriceAmazon(product.ProductURL)
 			fmt.Println(priceStr)
 			if err != nil {
 				log.Printf("Error scraping Amazon price for %s: %v\n", product.ProductURL, err)
-				continue
+				
 			}
 			currentPrice, err = strconv.ParseFloat(priceStr, 64)
 			if err != nil {
 				log.Printf("Error parsing price %s: %v\n", priceStr, err)
-				continue
+				return err
 			}
 		} else {
 			log.Printf("Unsupported vendor for URL: %s\n", product.ProductURL)
-			continue
+			return err
 		}
 
 		// currentPrice := int(product.PriceHistory[len(product.PriceHistory)-1].Value)
@@ -166,7 +126,8 @@ func UpdatePrices(user string) error {
 				"max_price": product.MaxPrice,
 			},
 		}
-
+		
+		collection := DB.Collection(user)
 		_, err = collection.UpdateOne(
 			context.Background(),
 			bson.M{"product_url": product.ProductURL},
@@ -174,11 +135,12 @@ func UpdatePrices(user string) error {
 		)
 		if err != nil {
 			log.Printf("Error updating price for %s: %v\n", product.ProductURL, err)
-			continue
+			return err
 		}
 
 		fmt.Printf("Updated price for %s: %.2f\n", product.ProductName, currentPrice)
 	}
+
 	return nil
 }
 
@@ -225,8 +187,4 @@ func UpdateIncompleteRecords(user string) error {
 		fmt.Printf("Successfully updated product: %s\n", product.ProductURL)
 	}
 	return nil
-}
-
-func Close() {
-	Client.Disconnect(context.Background())
 }

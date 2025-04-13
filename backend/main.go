@@ -2,10 +2,6 @@ package main
 
 import (
 	"log"
-	"fmt"
-	"strings"
-	"github.com/Cypher042/BArgus/backend/scraper"
-	"github.com/Cypher042/BArgus/backend/models"
 	"github.com/Cypher042/BArgus/backend/database"
 )
 
@@ -17,6 +13,13 @@ func main() {
 	disconnect := database.Connect()
 	defer disconnect()
 	log.Println("Starting Scraping..")
+
+	err := database.UpdateIncompleteRecords("cypher")
+
+	log.Println(err)
+	log.Println("starting price update")
+
+	log.Println(database.UpdatePrices("cypher"))
 
 
 }
