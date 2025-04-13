@@ -1,25 +1,40 @@
 package main
 
 import (
+	"context"
 	"log"
-	"github.com/Cypher042/BArgus/backend/database"
-)
 
+	"github.com/Cypher042/BArgus/backend/database"
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 func main() {
 	// Initialize MongoDB connection
-	// mongoURI := "mongodb://localhost:27017"
-
 	disconnect := database.Connect()
 	defer disconnect()
-	log.Println("Starting Scraping..")
 
-	err := database.UpdateIncompleteRecords("cypher")
+	log.Println("Listing all collections...")
+	collections, err := database.DB.ListCollectionNames(context.TODO(), bson.M{})
+	log.Println(collections)
+	if err != nil {
+		log.Fatalf("Error listing collections: %v", err)
+	}
 
-	log.Println(err)
-	log.Println("starting price update")
+	for _, collectionName := range collections {
+		
+		log.Printf("Processing collection: %s", collectionName)
+		// Example: Call UpdateIncompleteRecords for each collection
+		err := database.UpdateIncompleteRecords(collectionName)
+		if err != nil {
+			log.Printf("Error updating incomplete records for collection %s: %v", collectionName, err)
+		}
 
-	log.Println(database.UpdatePrices("cypher"))
+		// Example: Call UpdatePrices for each collection
+		err = database.UpdatePrices(collectionName)
+		if err != nil {
+			log.Printf("Error updating prices for collection %s: %v", collectionName, err)
+		}
+	}
 
-
+	log.Println("Finished processing all collections.")
 }
