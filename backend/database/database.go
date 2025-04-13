@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	
+	"github.com/Cypher042/BArgus/backend/config"
 	"github.com/Cypher042/BArgus/backend/scraper"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -33,61 +34,6 @@ func Connect() func() {
 			panic(err)
 		}
 	}
-}
-
-type Price struct {
-	Value     float64   `bson:"value"`
-	Timestamp time.Time `bson:"timestamp"`
-}
-
-type Product struct {
-	ProductURL     string   `bson:"product_url"`
-	ProductName    string   `bson:"product_name"`
-	ImageURL       string   `bson:"image_url"`
-	Specifications []string `bson:"specifications"`
-	PriceHistory   []Price  `bson:"price_history"`
-	MinPrice       float64  `bson:"min_price"`
-	MaxPrice       float64  `bson:"max_price"`
-}
-
-type MongoDB struct {
-	client     *mongo.Client
-	database   *mongo.Database
-	collection *mongo.Collection
-}
-
-func NewMongoDB(uri string, username string) (*MongoDB, error) {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	database := client.Database("price_tracker")
-	collection := database.Collection(username)
-
-	_, err = collection.Indexes().CreateOne(
-		context.Background(),
-		mongo.IndexModel{
-			Keys: bson.D{
-				{Key: "product_url", Value: 1},
-			},
-			Options: options.Index().SetUnique(true),
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &MongoDB{
-		client:     client,
-		database:   database,
-		collection: collection,
-	}, nil
 }
 
 func (m *MongoDB) UpsertProduct(product Product) error {
