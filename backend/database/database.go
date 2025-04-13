@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
 	"github.com/Cypher042/BArgus/backend/config"
+	"github.com/Cypher042/BArgus/backend/models"
 	"github.com/Cypher042/BArgus/backend/scraper"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -17,8 +18,9 @@ import (
 
 var Client *mongo.Client
 var DB *mongo.Database
-var Users *mongo.Collection
-var Games *mongo.Collection
+
+// var User *mongo.Collection
+// var Games *mongo.Collection
 
 func Connect() func() {
 	Client, err := mongo.Connect(options.Client().ApplyURI(config.MONGO_URI))
@@ -26,9 +28,8 @@ func Connect() func() {
 		panic(err)
 	}
 
-	DB = Client.Database("test")
-	Users = DB.Collection("users")
-	Games = DB.Collection("games")
+	DB = Client.Database("ThePriceTracker")
+
 	return func() {
 		if err := Client.Disconnect(context.TODO()); err != nil {
 			panic(err)
@@ -36,10 +37,13 @@ func Connect() func() {
 	}
 }
 
-func (m *MongoDB) UpsertProduct(product Product) error {
+func UpsertProduct(product models.Product, user string) error {
 	// 1. Try to find an existing product with the same URL
-	var existingProduct Product
-	err := m.collection.FindOne(
+	var existingProduct models.Product
+
+	collection := DB.Collection(user)
+
+	err := collection.FindOne(
 		context.Background(),
 		bson.M{"product_url": product.ProductURL},
 	).Decode(&existingProduct)
@@ -59,13 +63,14 @@ func (m *MongoDB) UpsertProduct(product Product) error {
 
 	filter := bson.M{"product_url": product.ProductURL}
 	update := bson.M{"$set": product}
-	opts := options.Update().SetUpsert(true)
+	opts := options.UpdateOne().SetUpsert(true)
+	opts.SetUpsert(true)
 
-	_, err = m.collection.UpdateOne(context.Background(), filter, update, opts)
+	_, err = collection.UpdateOne(context.Background(), filter, update, opts)
 	return err
 }
 
-func (m *MongoDB) AddPrice(productURL string, price float64) error {
+func AddPrice(productURL string, price float64) error {
 	newPrice := Price{
 		Value:     price,
 		Timestamp: time.Now(),
@@ -78,8 +83,8 @@ func (m *MongoDB) AddPrice(productURL string, price float64) error {
 	return err
 }
 
-func (m *MongoDB) GetProduct(productURL string) (*Product, error) {
-	var product Product
+func GetProduct(productURL string) (*models.Product, error) {
+	var product models.Product
 
 	err := m.collection.FindOne(
 		context.Background(),
@@ -92,11 +97,11 @@ func (m *MongoDB) GetProduct(productURL string) (*Product, error) {
 	return &product, nil
 }
 
-func (m *MongoDB) Close() {
+func Close() {
 	m.client.Disconnect(context.Background())
 }
 
-func (m *MongoDB) UpdatePrices() error {
+func UpdatePrices() error {
 	// Get all products
 	cursor, err := m.collection.Find(context.Background(), bson.M{})
 	if err != nil {
@@ -105,7 +110,7 @@ func (m *MongoDB) UpdatePrices() error {
 	defer cursor.Close(context.Background())
 
 	for cursor.Next(context.Background()) {
-		var product Product
+		var product models.Product
 		if err := cursor.Decode(&product); err != nil {
 			log.Printf("Error decoding product: %v\n", err)
 			continue
@@ -181,16 +186,11 @@ func (m *MongoDB) UpdatePrices() error {
 	return nil
 }
 
-func (m *MongoDB) UpdateIncompleteRecords() error {
+func UpdateIncompleteRecords(user string) error {
 
-	db, err := NewMongoDB(MongoURI, "cypher")
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer db.Close()
-
+	collection := DB.Collection(user)
 	fmt.Println("\nProcessing incomplete records...")
-	cursor, err := db.collection.Find(context.Background(), bson.M{
+	cursor, err := collection.Find(context.Background(), bson.M{
 		"$or": []bson.M{
 			{"product_name": ""},
 			{"product_name": bson.M{"$exists": false}},
@@ -201,12 +201,12 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 		},
 	})
 	if err != nil {
-		log.Fatalf("Error finding incomplete records: %v", err)
+		log.Fatalf("Could not find incomplete records: %v", err)
 	}
 	defer cursor.Close(context.Background())
 
 	for cursor.Next(context.Background()) {
-		var product Product
+		var product models.Product
 		if err := cursor.Decode(&product); err != nil {
 			log.Printf("Error decoding product: %v\n", err)
 			continue
@@ -214,14 +214,14 @@ func (m *MongoDB) UpdateIncompleteRecords() error {
 
 		url := (product.ProductURL)
 
-		updatedProduct, err := scrapeProductDetails(url)
+		updatedProduct, err := scraper.ScrapeProductDetails(url)
 
 		if err != nil {
 			log.Printf("Error updating product %s: %v\n", product.ProductURL, err)
 			continue
 		}
 
-		err = db.UpsertProduct(*updatedProduct)
+		err = UpsertProduct(*updatedProduct, user)
 		if err != nil {
 			log.Printf("Error updating product %s: %v\n", product.ProductURL, err)
 			continue

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Cypher042/BArgus/api/models"
@@ -24,12 +25,26 @@ func RegisterUser(c *fiber.Ctx) error {
 	user.Username = strings.TrimSpace(user.Username)
 	user.Password = strings.ToLower(strings.TrimSpace(user.Password))
 
+	log.Println(user)
+	if user.Username == "" {
+		return c.Status(400).JSON(fiber.Map{"error": "Username cannot be empty"})
+	}
+	if user.Password == "" {
+		return c.Status(400).JSON(fiber.Map{"error": "Password cannot be empty"})
+	}
 	collection := utils.DB.Collection(user.Username)
-	_, err := collection.InsertOne(context.TODO(), user)
+
+	var existingUser models.User
+	err := collection.FindOne(context.TODO(), bson.M{"username": user.Username}).Decode(&existingUser)
+	if err == nil {
+		return c.Status(400).JSON(fiber.Map{"error": "User already exists"})
+	}
+	// Insert the new user
+	_, err = collection.InsertOne(context.TODO(), user)
 	if err != nil {
+		log.Println(err)
 		return c.Status(500).JSON(fiber.Map{"error": "Could not create user"})
 	}
-
 	return c.JSON(fiber.Map{"message": "User registered successfully"})
 }
 

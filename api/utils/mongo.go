@@ -18,7 +18,7 @@ func Connect() func() {
 		panic(err)
 	}
 
-	DB = Client.Database("priceTracker")
+	DB = Client.Database("ThePriceTracker")
 	// Users = DB.Collection("users")
 	// Games = DB.Collection("games")
 	return func() {
