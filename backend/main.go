@@ -21,7 +21,7 @@ func main() {
 	}
 
 	for _, collectionName := range collections {
-		
+
 		log.Printf("Processing collection: %s", collectionName)
 		// Example: Call UpdateIncompleteRecords for each collection
 		err := database.UpdateIncompleteRecords(collectionName)
@@ -37,4 +37,5 @@ func main() {
 	}
 
 	log.Println("Finished processing all collections.")
+
 }
