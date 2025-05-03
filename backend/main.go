@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-
 	"github.com/Cypher042/BArgus/backend/database"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -19,7 +18,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error listing collections: %v", err)
 	}
-
 	for _, collectionName := range collections {
 
 		log.Printf("Processing collection: %s", collectionName)
@@ -35,7 +33,7 @@ func main() {
 			log.Printf("Error updating prices for collection %s: %v", collectionName, err)
 		}
 	}
-
 	log.Println("Finished processing all collections.")
 
 }
+
