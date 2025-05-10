@@ -4,28 +4,52 @@ import (
 	"context"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/Cypher042/BArgus/api/config"
 	"github.com/Cypher042/BArgus/api/models"
 	"github.com/Cypher042/BArgus/api/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
+func createToken(uid string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"uid": uid,
+			"exp": time.Now().Add(time.Hour * 24).Unix(),
+		},
+	)
+	tokenString, err := token.SignedString([]byte(config.JWT_SECRET))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
 func HealthCheck(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "OK", "message": "API is running"})
 }
 
 func RegisterUser(c *fiber.Ctx) error {
+	
 	user := new(models.User)
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
 	}
-
+	
+	if hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost); err != nil {
+		return (err)
+	} else {
+		user.Password = string(hashedPassword)
+	}
 	user.Username = strings.TrimSpace(user.Username)
-	user.Password = strings.ToLower(strings.TrimSpace(user.Password))
+	user.Uid = uuid.New().String()
 
-	log.Println(user)
+		log.Println(user)
 	if user.Username == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "Username cannot be empty"})
 	}
@@ -60,8 +84,31 @@ func LoginUser(c *fiber.Ctx) error {
 	if err != nil || stored.Password != user.Password {
 		return c.Status(401).JSON(fiber.Map{"error": "Invalid username or password"})
 	}
+	uid := user.Uid
+	if jwtString, err := createToken(uid); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error" : "Error while logging in"})
+	} else {
+		cookie := &fiber.Cookie{
+			Name:     "token",
+			Value:    jwtString,
+			Expires:  time.Now().Add(24 * time.Hour),
+			HTTPOnly: true,
+			Secure:   false,
+			SameSite: fiber.CookieSameSiteLaxMode,
+			Path:     "/",
+		}
+		c.Cookie(cookie)
+		uid_cookie := &fiber.Cookie{
+			Name:     "uid",
+			Value:    uid,
+			HTTPOnly: false,
+			Secure:   false,
+			Path:     "/",
+		}
+		c.Cookie(uid_cookie)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Login successful"})
+	}
 
-	return c.JSON(fiber.Map{"message": "Login successful"})
 }
 
 func AddURL(c *fiber.Ctx) error {
