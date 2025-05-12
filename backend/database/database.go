@@ -10,6 +10,7 @@ import (
 
 	"github.com/Cypher042/BArgus/backend/config"
 	"github.com/Cypher042/BArgus/backend/models"
+	"github.com/Cypher042/BArgus/backend/notifservice"
 	"github.com/Cypher042/BArgus/backend/scraper"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -115,6 +116,7 @@ func UpdatePrices(user string) error {
 
 		var currentPrice float64
 		var err error
+		var sendnotif bool = false
 
 		if strings.Contains(product.ProductURL, "flipkart") {
 			priceStr, err := scraper.ScrapePriceFlipkart(product.ProductURL)
@@ -143,10 +145,12 @@ func UpdatePrices(user string) error {
 			log.Printf("Unsupported vendor for URL: %s\n", product.ProductURL)
 			continue
 		}
-
-		// currentPrice := int(product.PriceHistory[len(product.PriceHistory)-1].Value)
+			
+			// currentPrice := int(product.PriceHistory[len(product.PriceHistory)-1].Value)
 		if product.MinPrice == 0 || currentPrice < product.MinPrice {
 			product.MinPrice = currentPrice
+			sendnotif = true
+			
 		}
 		if product.MaxPrice == 0 || currentPrice > product.MaxPrice {
 			product.MaxPrice = currentPrice
@@ -175,6 +179,9 @@ func UpdatePrices(user string) error {
 		if err != nil {
 			log.Printf("Error updating price for %s: %v\n", product.ProductURL, err)
 			continue
+		}
+		if (sendnotif){
+			notifservice.SendNotification(&product)
 		}
 
 		fmt.Printf("Updated price for %s: %.2f\n", product.ProductName, currentPrice)

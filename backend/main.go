@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+
 	"github.com/Cypher042/BArgus/backend/database"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -36,4 +37,3 @@ func main() {
 	log.Println("Finished processing all collections.")
 
 }
-
