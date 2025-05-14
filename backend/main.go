@@ -1,96 +1,39 @@
 package main
 
 import (
-	// "fmt"
-	// "time"
+	"context"
 	"log"
-	// "context"
-	"fmt"
-	"strings"
+
+	"github.com/Cypher042/BArgus/backend/database"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
-
-func scrapeProductDetails(productURL string) (*Product, error) {
-	if strings.Contains(productURL, "amazon") {
-		// Get product name
-		fmt.Println(productURL)
-		name, err := ScrapeNameAmazon(productURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scrape name: %v", err)
-		}
-
-		// Get image URL
-		imageURL, err := ScrapeImageURLAmazon(productURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scrape image URL: %v", err)
-		}
-
-		// Get specifications
-		specs, err := ScrapeFeatureListAmazon(productURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scrape specifications: %v", err)
-		}
-
-		filledProduct := &Product{
-			ProductURL:     productURL,
-			ProductName:    name,
-			ImageURL:       imageURL,
-			Specifications: specs,
-			PriceHistory:   []Price{},
-		}
-		return filledProduct, nil
-	}
-	if strings.Contains(productURL, "flipkart") {
-		// Get product name
-		name, err := ScrapeNameFlipkart(productURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scrape name: %v", err)
-		}
-		
-		// Get image URL
-		imageURL, err := ScrapeImageURLFlipkart(productURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scrape image URL: %v", err)
-		}
-		
-		// Get specifications
-		specs, err := ScrapeHighlightsFlipkart(productURL)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scrape specifications: %v", err)
-		}
-		
-		filledProduct := &Product{
-			ProductURL:     productURL,
-			ProductName:    name,
-			ImageURL:       imageURL,
-			Specifications: specs,
-			PriceHistory:   []Price{},
-		}
-		return filledProduct, nil
-	}
-	// return nil, fmt.Errorf("unsupported vendor or invalid URL: %s", productURL)
-	return nil, fmt.Errorf("unsupported vendor or invalid URL: %s", productURL)
-}
-
-
 
 func main() {
 	// Initialize MongoDB connection
-	// mongoURI := "mongodb://localhost:27017"
-	db, err := NewMongoDB(MongoURI, "cypher")
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer db.Close()
+	disconnect := database.Connect()
+	defer disconnect()
 
-	// Update prices
-	fmt.Println("Starting price update...")
-	err = db.UpdateIncompleteRecords()
+	log.Println("Listing all collections...")
+	collections, err := database.DB.ListCollectionNames(context.TODO(), bson.M{})
+	log.Println(collections)
 	if err != nil {
-		log.Fatalf("Failed to update prices: %v", err)
+		log.Fatalf("Error listing collections: %v", err)
 	}
-	err = db.UpdatePrices()
-	if err != nil {
-		log.Fatalf("Failed to update prices: %v", err)
+	for _, collectionName := range collections {
+
+		log.Printf("Processing collection: %s", collectionName)
+		// Example: Call UpdateIncompleteRecords for each collection
+		err := database.UpdateIncompleteRecords(collectionName)
+		if err != nil {
+			log.Printf("Error updating incomplete records for collection %s: %v", collectionName, err)
+		}
+
+		// Example: Call UpdatePrices for each collection
+		err = database.UpdatePrices(collectionName)
+		if err != nil {
+			log.Printf("Error updating prices for collection %s: %v", collectionName, err)
+		}
 	}
-	fmt.Println("Price update completed!")
+	log.Println("Finished processing all collections.")
+
 }
