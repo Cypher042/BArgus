@@ -81,10 +81,15 @@ func LoginUser(c *fiber.Ctx) error {
 	collection := utils.DB.Collection(user.Username)
 	var stored models.User
 	err := collection.FindOne(context.TODO(), bson.M{"username": user.Username}).Decode(&stored)
-	if err != nil || stored.Password != user.Password {
+	// Compare the hashed password
+	if(err != nil){
 		return c.Status(401).JSON(fiber.Map{"error": "Invalid username or password"})
 	}
-	uid := user.Uid
+    if err := bcrypt.CompareHashAndPassword([]byte(stored.Password), []byte(user.Password)); err != nil {
+        return c.Status(401).JSON(fiber.Map{"error": "Invalid username or password"})
+    }
+
+    uid := stored.Uid
 	if jwtString, err := createToken(uid); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error" : "Error while logging in"})
 	} else {
