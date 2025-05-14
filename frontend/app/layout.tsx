@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 // import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/Header';
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,9 +27,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main className="min-h-screen bg-background">{children}</main>
-          
+          <Providers>
+           
+            <main className="min-h-screen bg-background">{children}</main>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

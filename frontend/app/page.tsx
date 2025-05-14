@@ -1,7 +1,9 @@
-
+import Header from "@/components/layout/Header";
 
 export default function Home() {
   return (
+   <>
+    <Header />
     <div className="container py-8 md:py-12 lg:py-16">
       <div className="flex flex-col space-y-4 mb-12 text-center">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
@@ -12,7 +14,8 @@ export default function Home() {
         </p>
       </div>
 
-    
+
     </div>
+    </>
   );
 }

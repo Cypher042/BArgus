@@ -15,8 +15,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { LogInIcon, Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(3, {
@@ -29,6 +37,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,37 +47,34 @@ export default function LoginPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function handleLogin(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    try {
-      const res = await fetch("http://localhost:8000/login_user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          username: values.username,
-          password: values.password,
-        }),
-      });
-      const data = await res.json();
+    setError("");
 
-if (!res.ok) {
-  throw new Error(data.message || "Login failed");
-}
+    const res = await fetch("http://127.0.0.1:8000/login_user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        username: values.username,
+        password: values.password,
+      }),
+    });
 
-        if (data.success) {
-          window.location.href = "/";
-        } else {
-          // Handle login failure (e.g., show error message)
-          alert(data.message || "Login failed");
-        }
-    } catch (error) {
-      console.log( "Here is the error");
-    } finally {
-      setIsLoading(false);
+    const data = await res.json();
+    console.log(data.message);
+
+    if (data.message == "Login successful") {
+      alert(`Welcome, ${values.username}!`);
+      localStorage.setItem("username", values.username);
+      window.location.href = "/";
+    } else {
+      setError(data?.message || "Incorrect user or password");
     }
+
+    setIsLoading(false);
   }
 
   return (
@@ -77,12 +83,20 @@ if (!res.ok) {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>
-            Enter your email and password to sign in to your account
+            Enter your username and password to sign in
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-4 text-sm text-red-800 bg-red-50 rounded-lg">
+              {error}
+            </div>
+          )}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleLogin)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="username"
@@ -90,7 +104,7 @@ if (!res.ok) {
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="name@example.com" {...field} type="username" />
+                      <Input placeholder="your_username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -103,7 +117,11 @@ if (!res.ok) {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your password" {...field} type="password" />
+                      <Input
+                        placeholder="Enter your password"
+                        {...field}
+                        type="password"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -132,7 +150,7 @@ if (!res.ok) {
             </Link>
           </div>
           <div className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="hover:text-primary">
               Sign up
             </Link>
