@@ -40,19 +40,18 @@ export default function Header() {
 
   useEffect(() => {
     setMounted(true);
-    const storedUsername = localStorage.getItem("username");
+    const storedUsername = sessionStorage.getItem("username");
     if (storedUsername) {
       setLocalUsername(storedUsername);
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("username");
+    sessionStorage.removeItem("username");
     signOut({ callbackUrl: "/" });
   };
 
-  const displayUsername =
-    session?.user?.username || session?.user?.name || localUsername;
+  const displayUsername = localUsername;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -78,7 +77,7 @@ export default function Header() {
             href="/history"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
-            History
+            Your Products
           </Link>
           <Link
             href="/saved"

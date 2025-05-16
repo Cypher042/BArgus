@@ -51,30 +51,47 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    const res = await fetch("http://127.0.0.1:8000/login_user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        username: values.username,
-        password: values.password,
-      }),
-    });
+    try {
+      const res = await fetch("http://localhost:8000/login_user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: values.username,
+          password: values.password,
+        }),
+      });
 
-    const data = await res.json();
-    console.log(data.message);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
+      }
 
-    if (data.message == "Login successful") {
-      alert(`Welcome, ${values.username}!`);
-      localStorage.setItem("username", values.username);
-      window.location.href = "/";
-    } else {
-      setError(data?.message || "Incorrect user or password");
+      const data = await res.json();
+      console.log("Login response:", data);
+
+      if (data.message === "Login successful") {
+        sessionStorage.setItem("username", values.username);
+
+        if (data.token) {
+          sessionStorage.setItem("authToken", data.token);
+        }
+
+        toast.success("Login successful!");
+        window.location.href = "/";
+      } else {
+        setError(data?.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(typeof error === 'object' && error !== null && 'message' in error
+        ? String(error.message)
+        : "Failed to login. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   }
 
   return (

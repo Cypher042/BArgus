@@ -1,4 +1,5 @@
 import Header from "@/components/layout/Header";
+import Hero from "@/components/layout/Hero";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
           Powerful, fast, and easy-to-use web scraping tool for developers, researchers, and businesses.
         </p>
       </div>
+      <Hero/>
 
 
     </div>

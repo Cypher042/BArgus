@@ -74,7 +74,7 @@ export default function SignUpPage() {
       const data = await res.json();
       if (data.message == "User registered successfully") {
         alert(`Welcome, ${values.username}!`);
-        localStorage.setItem("username", values.username);
+        sessionStorage.setItem("username", values.username);
         window.location.href = "/";
       }
 

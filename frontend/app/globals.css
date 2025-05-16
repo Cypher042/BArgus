@@ -120,3 +120,16 @@
     @apply bg-background text-foreground;
   }
 }
+/* styles/slick.css */
+.slick-prev:before,
+.slick-next:before {
+  color: #000;
+}
+
+.slick-slide {
+  padding: 0 10px;
+}
+
+.slick-list {
+  margin: 0 -10px;
+}
