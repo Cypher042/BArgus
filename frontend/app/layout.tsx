@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 // import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/layout/Header';
+import Header from '@/app/Header';
 import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -28,8 +28,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-           
-            <main className="min-h-screen bg-background">{children}</main>
+
+            <main className="min-h-screen ">{children}</main>
+            <footer className="bg-muted opacity-50 py-12">
+          <div className="container mx-auto px-4 text-center text-gray-200">
+          <p>Made with 💗  </p>
+          </div>
+          </footer>
           </Providers>
         </ThemeProvider>
       </body>

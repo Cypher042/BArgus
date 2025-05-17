@@ -113,10 +113,13 @@ export default function Hero() {
       </h1>
 
       {loading ? (
-        <div className="text-center">Loading products...</div>
+        <div className="text-center">Please sign-in to see your products</div>
       ) : listOfProducts.length === 0 ? (
         <div className="text-center text-muted-foreground">
           No products found.
+          <button>
+            Add products
+          </button>
         </div>
       ) : (
         <div className="overflow-x-auto">

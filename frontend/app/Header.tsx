@@ -83,13 +83,13 @@ export default function Header() {
             href="/saved"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
-            Saved
+            Add Products
           </Link>
           <Link
             href="/docs"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
-            Documentation
+            About
           </Link>
         </nav>
 
