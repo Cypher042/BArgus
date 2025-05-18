@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,7 +74,8 @@ export default function SignUpPage() {
 
       const data = await res.json();
       if (data.message == "User registered successfully") {
-        alert(`Welcome, ${values.username}!`);
+        // alert(`Welcome, ${values.username}!`);
+        toast.success("✅ Signup  successful!");
         sessionStorage.setItem("username", values.username);
         window.location.href = "/";
       }

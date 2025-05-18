@@ -79,7 +79,8 @@ export default function LoginPage() {
           sessionStorage.setItem("authToken", data.token);
         }
 
-        toast.success("Login successful!");
+
+        toast.success("✅ Login successful!");
         window.location.href = "/";
       } else {
         setError(data?.message || "Login failed");
@@ -121,7 +122,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="your_username" {...field} />
+                      <Input placeholder="Your username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

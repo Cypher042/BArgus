@@ -1,9 +1,24 @@
+"use client";
+
 import Header from "@/app/Header";
 import Hero from "@/app/Hero";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import './globals.css';
+import AddUrl from "./AddUrl";
+import { useRef } from "react";
+
+
+
+
 export default function Home() {
+   const addUrlRef = useRef<HTMLDivElement>(null);
+
+  const scrollToAddUrl = () => {
+    if (addUrlRef.current) {
+      addUrlRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
    <>
     <Header />
@@ -17,8 +32,8 @@ export default function Home() {
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea amet hic minus aspernatur laudantium aliquid.
         </p>
         <div  className="flex justify-center space-x-4">
-        <Button size="lg" className="p-6 text-2xl" variant="outline">
-                    Add Products
+        <Button size="lg" className="p-6 text-2xl" variant="outline"  onClick={scrollToAddUrl} >
+                  Get Started
                 </Button>
         </div>
         <div className="flex flex-row items-center justify-between max-w-6xl w-full mt-12 mx-auto px-4">
@@ -42,40 +57,9 @@ export default function Home() {
       </div>
       <Hero/>
 
-      <section className="w-full bg-background mt-24 px-4">
-  <div className="max-w-6xl mx-auto py-16 px-6  ">
-    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-
-      {/* Text Side */}
-      <div className="text-left md:max-w-[50%] space-y-4">
-        <h2 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl text-foreground">
-          Ready to Explore?
-        </h2>
-        <p className="text-muted-foreground md:text-lg">
-          Add your product to the watchlist and get notified when there is a price drop.
-        </p>
-      </div>
-
-      {/* Form Side */}
-      <form
-        // onSubmit={handleSubmit}
-        className="w-full md:w-[50%] flex flex-col md:flex-row items-center gap-4"
-      >
-        <input
-          // type="url"
-          placeholder="Enter product URL"
-          // value={url}
-          // onChange={(e) => setUrl(e.target.value)}
-          className="flex-grow px-4 py-3 rounded-md text-foreground bg-background border focus:outline-none focus:ring-2 focus:ring-primary"
-          required
-        />
-        <Button type="submit" size="lg" className="h-12 w-full md:w-auto">
-          Add Product
-        </Button>
-      </form>
-    </div>
-  </div>
-</section>
+    <div ref={addUrlRef}>
+          <AddUrl />
+        </div>
 
     </div>
 

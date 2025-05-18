@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   MoonIcon,
@@ -33,6 +34,7 @@ export default function Header() {
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [localUsername, setLocalUsername] = useState<string | null>(null);
+  const router = useRouter();
   const { data: session, status } = useSession() as {
     data: CustomSession | null;
     status: string;
@@ -48,7 +50,7 @@ export default function Header() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("username");
-    signOut({ callbackUrl: "/" });
+     window.location.reload();
   };
 
   const displayUsername = localUsername;

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { encode } from 'js-base64';
 import Slider from "react-slick";
+import { Button } from "@/components/ui/button";
 
 interface Product {
   ID:string;
@@ -48,6 +49,7 @@ export default function Hero() {
 
   async function fetchProducts() {
     try {
+      
       setLoading(true);
       const authToken = sessionStorage.getItem("authToken");
       const result = await fetch(
@@ -72,7 +74,7 @@ export default function Hero() {
         }
         const errorData = await result.json().catch(() => ({}));
         throw new Error(
-          errorData.message || `HTTP error! status: ${result.status}`
+          errorData.message || `Product list error: ${result.status}`
         );
       }
 
@@ -80,11 +82,11 @@ export default function Hero() {
       const filtered = Array.isArray(data) ? data.filter(isValidProduct) : [];
       setListOfProducts(filtered);
     } catch (err) {
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch products. Please try again."
-      );
+      // toast.error(
+      //   err instanceof Error
+      //     ? err.message
+      //     : "Failed to fetch products. Please try again."
+      // );
     } finally {
       setLoading(false);
     }
@@ -115,11 +117,11 @@ export default function Hero() {
       {loading ? (
         <div className="text-center">Please sign-in to see your products</div>
       ) : listOfProducts.length === 0 ? (
-        <div className="text-center text-muted-foreground">
-          No products found.
-          <button>
-            Add products
-          </button>
+        <div className="text-center text-muted-foreground ">
+          <p className="text-lg text-muted-foreground m-2">
+             No products found.</p>
+
+
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -140,7 +142,7 @@ export default function Hero() {
                     key={index}
                     className="hover:bg-muted cursor-pointer transition"
                     onClick={() =>
-                      router.push(`/product/${encode(product.ProductURL)}`)
+                      router.push(`/product/${product.ID}`)
                     }
                   >
                     <td className="p-4 flex items-center gap-4">

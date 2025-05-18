@@ -1,6 +1,5 @@
 // app/product/[producturl]/page.tsx
-
-import { decode } from "js-base64";
+"use client"
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { Line } from "react-chartjs-2";
 import { Chart, LineElement, PointElement, LinearScale, CategoryScale, Tooltip } from "chart.js";
 
-// Register chart components
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 Chart.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip);
 
 type PriceEntry = {
@@ -18,27 +18,28 @@ type PriceEntry = {
 
 type Product = {
   ProductName: string;
-  ProductURL: string;
+    params: { ID: string };
   ImageURL?: string;
-  [key: string]: any; // fallback for dynamic keys
+  [key: string]: any;
+
 };
 
-async function getProductData(username: string, encodedUrl: string): Promise<{
+async function getProductData(username: string| null, ID: string): Promise<{
   product: Product | null;
   priceHistory: PriceEntry[] | null;
 }> {
   try {
-    const productUrl = decode(encodedUrl);
+
     const productRes = await fetch(`http://localhost:8000/api/user/${username}`, {
       cache: "no-store",
     });
     const productList: Product[] = await productRes.json();
-    const product = productList.find((p) => p.ProductURL === productUrl);
+    const product = productList.find((p) => p.ID === ID);
 
     if (!product) return { product: null, priceHistory: null };
 
     const priceRes = await fetch(
-      `http://localhost:8000/api/${username}/prices/${encodeURIComponent(productUrl)}`,
+      `http://localhost:8000/api/${username}/prices/${ID}`,
       { cache: "no-store" }
     );
     const priceHistory: PriceEntry[] = await priceRes.json();
@@ -52,12 +53,19 @@ async function getProductData(username: string, encodedUrl: string): Promise<{
 export default async function ProductPage({
   params,
 }: {
-  params: { producturl: string };
+  params: { ID: string };
 }) {
-  const username = "demo"; // You should dynamically pass this
-  const { product, priceHistory } = await getProductData(username, params.producturl);
+   const [displayUsername, setDisplayUsername] = useState<string|null>(null);
 
-  if (!product) return notFound();
+   useEffect(() => {
+     const storedUsername = sessionStorage.getItem("username");
+     if (storedUsername) {
+       setDisplayUsername(storedUsername);
+      }
+    }, []);
+
+  const { product, priceHistory } = await getProductData(displayUsername, params.ID);
+    if (!product) return notFound();
 
   const productName = product.ProductName;
   const productLink = product.ProductURL;
