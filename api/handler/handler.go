@@ -134,6 +134,7 @@ func AddURL(c *fiber.Ctx) error {
 	}
 
 	product := models.Product{
+		PID : uuid.New().String(),
 		ProductURL:     body.URL,
 		ImageURL:       "",
 		ProductName:    "",
@@ -143,25 +144,40 @@ func AddURL(c *fiber.Ctx) error {
 		PriceHistory:   []models.Price{},
 	}
 
-	result, err := collection.InsertOne(context.TODO(), product)
+	_, err = collection.InsertOne(context.TODO(), product)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Insert failed"})
 	}
 
-	return c.Status(201).JSON(fiber.Map{"inserted_id": result.InsertedID})
+	return c.Status(201).JSON(fiber.Map{"inserted_id": product.PID})
+
 }
 
 func GetUserProds(c *fiber.Ctx) error {
 	username := c.Params("username")
 	collection := utils.DB.Collection(username)
 
-	cursor, err := collection.Find(context.TODO(), bson.M{})
+	filter := bson.M{
+        "username": bson.M{
+            "$exists": false,
+        },
+    }
+
+	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch products"})
 	}
-
+	for cursor.Next(context.TODO()) {
+		var result bson.M
+		if err := cursor.Decode(&result); err != nil {
+			log.Println("Error decoding document:", err)
+			continue
+		}
+		log.Println(result)
+	}
 	var products []models.Product
 	if err := cursor.All(context.TODO(), &products); err != nil {
+		log.Println("Error decoding cursor:", err)
 		return c.Status(500).JSON(fiber.Map{"error": "Cursor error"})
 	}
 
