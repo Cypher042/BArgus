@@ -11,7 +11,7 @@ import (
 func Setup(app *fiber.App) {
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://34.100.248.83:5173/",
+		AllowOrigins:     "http://34.100.248.83:5173/, http://localhost:8000, http://localhost:3000",
 		AllowCredentials: true,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
