@@ -3,6 +3,7 @@
 BArgus is a smart, no-nonsense price tracker that *stalks* your favorite products and notifies you when the price drops. Built with blazing-fast Go (Fiber) and MongoDB, it helps you shop smarter, not harder.
 
 Add a link to your watchlist, and BArgus will track every drop—so you buy at the perfect time.
+
 ---
 
 ## 💻 Self-Host Friendly
