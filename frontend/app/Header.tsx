@@ -62,7 +62,7 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-2">
             <SpiderIcon className="h-6 w-6 text-primary" />
             <span className="font-semibold text-xl hidden sm:inline-block">
-              BARGUS
+              BArgus
             </span>
           </Link>
         </div>
@@ -88,10 +88,10 @@ export default function Header() {
             Add Products
           </Link>
           <Link
-            href="/docs"
+            href="/pricing"
             className="text-sm font-medium hover:text-primary transition-colors"
           >
-            About
+            Pricing
           </Link>
         </nav>
 
