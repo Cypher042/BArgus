@@ -10,13 +10,23 @@ import (
 
 func SendNotification(product *models.Product) {
 
-	currprice := strconv.FormatFloat(product.PriceHistory[len(product.PriceHistory)-1].Value, 'f', -1, 64)
-	req, _ := http.NewRequest("POST", "https://ntfy.sh/thepricetracker" ,strings.NewReader("Now Availaible at " + currprice))
-	req.Header.Set("Click", "https://home.nest.com/")
-	req.Header.Set("Title", product.ProductName)
-	req.Header.Set("Attach", product.ProductURL)
-	// req.Header.Set("Email", "phil@example.com")
-	http.DefaultClient.Do(req)
+	if len(product.PriceHistory) == 0 {
+		req, _ := http.NewRequest("POST", "https://ntfy.sh/thepricetracker" ,strings.NewReader("New Product Added"))
+		req.Header.Set("Click", "https://home.nest.com/")
+		req.Header.Set("Title", product.ProductName)
+		req.Header.Set("Attach", product.ProductURL)
+		// req.Header.Set("Email", "phil@example.com")
+		http.DefaultClient.Do(req)
+	}else{
+
+		currprice := strconv.FormatFloat(product.PriceHistory[len(product.PriceHistory)-1].Value, 'f', -1, 64)
+		req, _ := http.NewRequest("POST", "https://ntfy.sh/thepricetracker" ,strings.NewReader("Now Availaible at " + currprice))
+		req.Header.Set("Click", "https://home.nest.com/")
+		req.Header.Set("Title", product.ProductName)
+		req.Header.Set("Attach", product.ProductURL)
+		// req.Header.Set("Email", "phil@example.com")
+		http.DefaultClient.Do(req)
+	}
 
 }
 

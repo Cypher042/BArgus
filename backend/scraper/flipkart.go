@@ -35,8 +35,9 @@ func ScrapePriceFlipkart(url string) (string, error) {
 
 	err := scraper.Visit(url)
 	if err != nil {
-		return "", fmt.Errorf("Error visiting URL: %v", err)
+		return "", fmt.Errorf("error visiting URL: %v", err)
 	}
+
 	if price == "" {
 		return "", fmt.Errorf("price not found on Flipkart page")
 	}
