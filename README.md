@@ -34,7 +34,8 @@ Credits to the awesome team behind ntfy for making push notifications this easy.
 ---
 ## 📸 Preview
 
-![screenshot](./screenshot.png) 
+![image](https://github.com/user-attachments/assets/d1744778-61cd-4e82-8b45-a3c77c7bd2dd)
+
 
 ---
 
