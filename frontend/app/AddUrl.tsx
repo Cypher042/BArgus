@@ -21,7 +21,7 @@ const AddUrl = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/user/${username}/add_url`, {
+      const response = await fetch(`http://20.2.89.187:8000/api/user/${username}/add_url`, {
         credentials: "include",
         method: "POST",
         headers: {

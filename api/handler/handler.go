@@ -46,7 +46,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	} else {
 		user.Password = string(hashedPassword)
 	}
-	user.Username = strings.TrimSpace(user.Username)
+	user.Username = strings.ReplaceAll(user.Username, " ", "")
 	user.Uid = uuid.New().String()
 
 		log.Println(user)
@@ -137,7 +137,7 @@ func AddURL(c *fiber.Ctx) error {
 		PID : uuid.New().String(),
 		ProductURL:     body.URL,
 		ImageURL:       "",
-		ProductName:    "",
+		ProductName:    "waiting...for...update...",
 		Specifications: []string{},
 		MaxPrice:       0,
 		MinPrice:       0,

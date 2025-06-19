@@ -52,7 +52,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8000/login_user", {
+      const res = await fetch("http://20.2.89.187:8000/login_user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

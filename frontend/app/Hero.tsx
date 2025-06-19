@@ -53,7 +53,7 @@ export default function Hero() {
       setLoading(true);
       const authToken = sessionStorage.getItem("authToken");
       const result = await fetch(
-        `http://localhost:8000/api/user/${displayUsername}`,
+        `http://20.2.89.187:8000/api/user/${displayUsername}`,
         {
           method: "GET",
           headers: {

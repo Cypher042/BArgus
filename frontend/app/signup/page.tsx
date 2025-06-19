@@ -61,7 +61,7 @@ export default function SignUpPage() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/register_user", {
+      const res = await fetch("http://20.2.89.187:8000/register_user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

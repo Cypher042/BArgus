@@ -24,7 +24,7 @@ async function getProductAndPrices(username: string, id: string) {
     }),
   ]);
 
-  if (!productRes.ok || !pricesRes.ok) return null;
+  if (!productRes.ok) return null;
 
   const userData = await productRes.json();
   const product = userData.products.find((p: any) => p.id === id);
@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const { id } = params;
   const data = await getProductAndPrices(username, id);
 
-  if (!data || !data.product) return notFound();
+  if (!data) return notFound();
 
   useEffect(() => {
     const storedUsername = sessionStorage.getItem("username");
@@ -49,6 +49,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
   const { product, priceHistory } = data;
   const { image, name, price, link, ...rest } = product;
+
+  const latestPrice = priceHistory && priceHistory.length > 0
+    ? priceHistory[priceHistory.length - 1].price
+    : null;
 
   return (
     <div className="max-w-6xl mx-auto p-6 text-white space-y-8">
@@ -67,7 +71,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
         <Card className="bg-[#121212]">
           <CardContent className="p-4">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold">Price: ${price}</h2>
+              <h2 className="text-2xl font-semibold">
+                Price: {latestPrice !== null ? `$${latestPrice}` : <span className="text-gray-400">No price data</span>}
+              </h2>
               <p className="text-sm text-blue-400 break-words">
                 <a href={link} target="_blank" rel="noopener noreferrer" className="underline">Product Link</a>
               </p>
@@ -99,3 +105,4 @@ export default async function ProductPage({ params }: { params: { id: string } }
     </div>
   );
 }
+

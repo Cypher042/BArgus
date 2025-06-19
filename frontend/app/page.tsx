@@ -43,7 +43,6 @@ export default function Home() {
         </h2>
         <p className="text-muted-foreground md:text-xl mx-auto max-w-[600]">
          Add it. Track it. Strike when the price drops.
-        BArgus will ping you when it’s time to pounce.
         </p>
         <div  className="flex justify-center space-x-4">
         <Button size="lg" className="p-6 text-2xl" variant="outline"  onClick={scrollToAddUrl} >

@@ -30,7 +30,7 @@ async function getProductData(username: string| null, ID: string): Promise<{
 }> {
   try {
 
-    const productRes = await fetch(`http://localhost:8000/api/user/${username}`, {
+    const productRes = await fetch(`http://20.2.89.187:8000/api/user/${username}`, {
       cache: "no-store",
     });
     const productList: Product[] = await productRes.json();
@@ -39,7 +39,7 @@ async function getProductData(username: string| null, ID: string): Promise<{
     if (!product) return { product: null, priceHistory: null };
 
     const priceRes = await fetch(
-      `http://localhost:8000/api/${username}/prices/${ID}`,
+      `http://20.2.89.187:8000/api/${username}/prices/${ID}`,
       { cache: "no-store" }
     );
     const priceHistory: PriceEntry[] = await priceRes.json();

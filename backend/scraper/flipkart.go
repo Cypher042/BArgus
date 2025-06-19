@@ -7,9 +7,13 @@ import (
 
 	"github.com/gocolly/colly"
 )
-
 func ScrapePriceFlipkart(url string) (string, error) {
-	scraper := colly.NewCollector()
+	// scraper := colly.NewCollector()
+	scraper := colly.NewCollector(
+		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"),
+		colly.AllowURLRevisit(),
+		colly.MaxDepth(1),
+	)
 
 	var price string
 
@@ -31,13 +35,14 @@ func ScrapePriceFlipkart(url string) (string, error) {
 
 	err := scraper.Visit(url)
 	if err != nil {
-		log.Fatalf("Error visiting URL: %v", err)
+		return "", fmt.Errorf("Error visiting URL: %v", err)
 	}
 	if price == "" {
-		return "", fmt.Errorf("price not found on Amazon page")
+		return "", fmt.Errorf("price not found on Flipkart page")
 	}
 	return price, err
 }
+
 
 func ScrapeImageURLFlipkart(url string) (string, error) {
 	scraper := colly.NewCollector()

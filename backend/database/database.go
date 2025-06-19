@@ -195,7 +195,7 @@ func UpdateIncompleteRecords(user string) error {
 	fmt.Println("\nProcessing incomplete records...")
 	cursor, err := collection.Find(context.Background(), bson.M{
 		"$or": []bson.M{
-			{"product_name": ""},
+			{"product_name": "waiting...for...update..."},
 			{"product_name": bson.M{"$exists": false}},
 			{"image_url": ""},
 			{"image_url": bson.M{"$exists": false}},
