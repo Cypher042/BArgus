@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pymongo import MongoClient
 from bson import ObjectId
 import pandas as pd
-import prophet
+import prophet as pp
 from config import MONGODB_URI
 
 app = FastAPI()
@@ -12,13 +12,13 @@ async def predict(username: str, product_id: str, days: int = 7):
     try:
         # Connect to MongoDB and get historical data
         client = MongoClient(MONGODB_URI)
-        db = client['price_tracker']
+        db = client['ThePriceTracker']
         collection = db[username]       
         
         # Fetch historical data for the specific product using ObjectId
         print(product_id)
         cursor = collection.aggregate([
-            {'$match': {'_id': ObjectId(product_id)}},
+            {'$match': {'_id': product_id}},
             {'$unwind': '$price_history'},
             {'$project': {
                 'value': '$price_history.value',
@@ -26,7 +26,7 @@ async def predict(username: str, product_id: str, days: int = 7):
                 '_id': 0
             }}
         ])
-        print(product_id)
+        # print(list(cursor))
         
         # Convert to DataFrame and check if any data was found
         # df = pd.DataFrame(list(cursor))
@@ -45,8 +45,22 @@ async def predict(username: str, product_id: str, days: int = 7):
         df['ds'] = pd.to_datetime(df['ds'])
         
         print(df)
+        best_params = {'changepoint_prior_scale': 0.9, 'changepoint_range': 1, 'daily_seasonality': True, 'growth': 'linear', 'interval_width': 0.8033028876267627, 'n_changepoints': 200, 'seasonality_mode': 'multiplicative', 'seasonality_prior_scale': 5.999503574189418, 'uncertainty_samples': 1000, 'weekly_seasonality': False, 'yearly_seasonality': False}
+
         # Train model and make predictions
-        model = prophet.Prophet()
+        model = pp.Prophet(
+        changepoint_prior_scale=best_params['changepoint_prior_scale'],
+        changepoint_range=best_params['changepoint_range'],
+        daily_seasonality=best_params['daily_seasonality'],
+        growth=best_params['growth'],
+        interval_width=best_params['interval_width'],
+        n_changepoints=best_params['n_changepoints'],
+        seasonality_mode=best_params['seasonality_mode'],
+        seasonality_prior_scale=best_params['seasonality_prior_scale'],
+        uncertainty_samples=best_params['uncertainty_samples'],
+        weekly_seasonality=best_params['weekly_seasonality'],
+        yearly_seasonality=best_params['yearly_seasonality']
+        )        
         model.fit(df)
         future = model.make_future_dataframe(periods=days, include_history=True)
         forecast = model.predict(future)
@@ -67,6 +81,6 @@ async def predict(username: str, product_id: str, days: int = 7):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/health")
+@app.get("/")
 async def health_check():
     return {"status": "healthy"}
