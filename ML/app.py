@@ -45,7 +45,7 @@ async def predict(username: str, product_id: str, days: int = 7):
         df['ds'] = pd.to_datetime(df['ds'])
         
         print(df)
-        best_params = {'changepoint_prior_scale': 0.05459000531305852, 'changepoint_range': 0.6579683709175497, 'daily_seasonality': True, 'growth': 'linear', 'interval_width': 0.8033028876267627, 'n_changepoints': 450, 'seasonality_mode': 'multiplicative', 'seasonality_prior_scale': 5.999503574189418, 'uncertainty_samples': 1000, 'weekly_seasonality': False, 'yearly_seasonality': False}
+        best_params = {'changepoint_prior_scale': 0.9, 'changepoint_range': 1, 'daily_seasonality': True, 'growth': 'linear', 'interval_width': 0.8033028876267627, 'n_changepoints': 200, 'seasonality_mode': 'multiplicative', 'seasonality_prior_scale': 5.999503574189418, 'uncertainty_samples': 1000, 'weekly_seasonality': False, 'yearly_seasonality': False}
 
         # Train model and make predictions
         model = pp.Prophet(

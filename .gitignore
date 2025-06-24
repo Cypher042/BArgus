@@ -8,3 +8,5 @@ __pycache__
 *.jsonl.gz
 *.venv
 *.ipynb
+
+__pycache__
